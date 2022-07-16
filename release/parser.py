@@ -6,12 +6,18 @@ from pydantic import BaseModel, validator
 
 
 class FromTime(BaseModel):
-    timezone: str
+    timezone: Optional[str]
     format: str
 
 
 class Version(BaseModel):
-    from_time: FromTime
+    from_time: Optional[FromTime]
+
+    @validator("*")
+    def check_version(cls, values):
+        if not values:
+            raise ValueError("Version must be specified")
+        return values
 
 
 class Step(BaseModel):
