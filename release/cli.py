@@ -1,7 +1,9 @@
 from pathlib import Path
 import click
 
-from . import parser
+
+from .parser import load_release_config
+from .steps import run_steps
 
 
 @click.command()
@@ -12,4 +14,5 @@ from . import parser
     default="release.yaml",
 )
 def main(release_file: Path):
-    pass
+    config = load_release_config(release_file)
+    run_steps(config.steps)
