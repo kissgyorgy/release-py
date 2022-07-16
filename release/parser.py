@@ -1,17 +1,19 @@
+import datetime as dt
 from pathlib import Path
+from string import Template
 from typing import List, Optional
 
 import yaml
 from pydantic import BaseModel, validator
 
 
-class FromTime(BaseModel):
+class FromTimeVersion(BaseModel):
     timezone: Optional[str]
     format: str
 
 
 class Version(BaseModel):
-    from_time: Optional[FromTime]
+    from_time: Optional[FromTimeVersion]
 
     @validator("*")
     def check_version(cls, values):
