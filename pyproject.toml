@@ -4,6 +4,12 @@ version = "0.1.0"
 description = "Release framework"
 authors = ["György Kiss <kissgyorgy@me.com>"]
 license = "MIT"
+packages = [
+    {include = "release"},
+]
+
+[tool.poetry.scripts]
+release = "release.cli:main"
 
 [tool.poetry.dependencies]
 python = "^3.8"
