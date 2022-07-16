@@ -7,13 +7,8 @@ import yaml
 from pydantic import BaseModel, validator
 
 
-class FromTimeVersion(BaseModel):
-    timezone: Optional[str]
-    format: str
-
-
 class Version(BaseModel):
-    from_time: Optional[FromTimeVersion]
+    from_time: Optional[str]
 
     @validator("*")
     def check_version(cls, values):
@@ -50,9 +45,9 @@ def load_release_config(path: Path) -> ReleaseConfig:
 
 def parse_version(version: Version) -> str:
     if version.from_time:
-        info: FromTimeVersion = version.from_time
+        format_str = version.from_time
         now = dt.datetime.now()
-        return f"{now:{info.format}}"
+        return f"{now:{format_str}}"
 
     raise ValueError
 
