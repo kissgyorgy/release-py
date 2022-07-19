@@ -1,7 +1,7 @@
 import datetime as dt
 from pathlib import Path
 from string import Template
-from typing import List, Optional
+from typing import List, Mapping, Optional
 
 import yaml
 from pydantic import BaseModel, validator
@@ -55,15 +55,27 @@ def parse_version(version: Version) -> str:
     raise ValueError
 
 
-def parse_initial_variables(config: ReleaseConfig) -> Variables:
+def parse_initial_variables(config: ReleaseConfig, env: Mapping[str, str]) -> Variables:
     version = parse_version(config.version)
     variables = {"version": version}
     for name, value in config.variables.items():
-        variables[name] = render_text(value, variables)
+        variables[name] = render_with_envvars(value, variables, env)
     return variables
 
 
+class EnvTemplate(Template):
+    """Substitute variables regularly, but environment variables need "env." prefix,
+    and only with the braced syntax.
+    For example: ${env.HOME} works, but $env.HOME does nothing.
+    """
+
+    braceidpattern = rf"(?:env\.)?{Template.idpattern}"
+
+
+def render_with_envvars(text: str, variables: Variables, env: Mapping[str, str]):
+    envvars = {f"env.{k}": v for k, v in env.items()}
+    return EnvTemplate(text).safe_substitute({**envvars, **variables})
+
+
 def render_text(text: str, variables: Variables) -> str:
-    t = Template(text)
-    replaced = t.safe_substitute(**variables)
-    return replaced
+    return Template(text).safe_substitute(variables)

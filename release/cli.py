@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import click
@@ -29,7 +30,7 @@ def start(obj: dict):
         config = load_release_config(obj["release_file"])
     except ValidationError as e:
         raise click.UsageError(str(e))
-    variables = parse_initial_variables(config)
+    variables = parse_initial_variables(config, os.environ)
     run_steps(config.steps, variables)
 
 
