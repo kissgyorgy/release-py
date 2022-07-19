@@ -3,7 +3,7 @@ from pathlib import Path
 import click
 from pydantic import ValidationError
 
-from .parser import load_release_config, parse_version
+from .parser import load_release_config, parse_initial_variables
 from .steps import run_steps
 
 
@@ -29,8 +29,8 @@ def start(obj: dict):
         config = load_release_config(obj["release_file"])
     except ValidationError as e:
         raise click.UsageError(str(e))
-    version = parse_version(config.version)
-    run_steps(version, config.steps)
+    variables = parse_initial_variables(config)
+    run_steps(config.steps, variables)
 
 
 @main.command()

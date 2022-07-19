@@ -6,6 +6,8 @@ from typing import List, Optional
 import yaml
 from pydantic import BaseModel, validator
 
+from .types import Variables
+
 
 class Version(BaseModel):
     from_time: Optional[str]
@@ -34,6 +36,7 @@ class Step(BaseModel):
 
 class ReleaseConfig(BaseModel):
     version: Version
+    variables: Variables
     steps: List[Step]
 
 
@@ -52,7 +55,15 @@ def parse_version(version: Version) -> str:
     raise ValueError
 
 
-def render_text(text: str, version: str) -> str:
+def parse_initial_variables(config: ReleaseConfig) -> Variables:
+    version = parse_version(config.version)
+    variables = {"version": version}
+    for name, value in config.variables.items():
+        variables[name] = render_text(value, variables)
+    return variables
+
+
+def render_text(text: str, variables: Variables) -> str:
     t = Template(text)
-    replaced = t.safe_substitute(version=version)
+    replaced = t.safe_substitute(**variables)
     return replaced
