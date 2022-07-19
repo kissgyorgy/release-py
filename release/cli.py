@@ -44,4 +44,4 @@ def validate(ctx: click.Context):
         click.secho(e, fg="yellow")
         ctx.exit(1)
     else:
-        click.echo("Configuration file is valid!")
+        click.echo("Configuration file seems valid!")
