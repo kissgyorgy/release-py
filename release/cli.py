@@ -4,7 +4,7 @@ from pathlib import Path
 import click
 from pydantic import ValidationError
 
-from .parser import load_release_config, parse_initial_variables
+from .config import load_release_config, parse_initial_variables
 from .steps import run_steps
 
 
