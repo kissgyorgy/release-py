@@ -3,7 +3,9 @@ from typing import List
 
 import click
 
-from .parser import Step, render_text
+from . import git
+from .config import Step
+from .parser import render_text
 from .types import Variables
 
 
@@ -23,6 +25,14 @@ def run_steps(steps: List[Step], variables: Variables):
             description = render_text(step.description, variables)
             indented_description = textwrap.indent(description, "   ")
             click.echo(indented_description)
+
+        output = ""
+
+        if step.git:
+            output = git.run_step(step.git, variables)
+
+        if step.set_variable:
+            variables[step.set_variable] = output
 
         wait_for_enter_press()
         click.echo("✅\n")

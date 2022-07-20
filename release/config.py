@@ -5,6 +5,7 @@ from typing import List, Mapping, Optional
 import yaml
 from pydantic import BaseModel, validator
 
+from .git import GitConfig
 from .parser import render_with_envvars
 from .types import Variables
 
@@ -22,6 +23,7 @@ class Version(BaseModel):
 class Step(BaseModel):
     title: str
     description: Optional[str]
+    git: Optional[GitConfig]
     set_variable: Optional[str]
 
     @property
