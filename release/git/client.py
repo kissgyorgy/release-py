@@ -12,15 +12,18 @@ class Repo:
     def __init__(self, path: Path):
         self._repo = pg2.Repository(path.resolve())
 
-    def get_tag_ref(self, tag_name: str) -> pg2.Reference:
+    def get_tag_ref(self, long_tag_name: str) -> pg2.Reference:
+        tag_name = long_tag_name.split("-", 1)[0]
         return self._repo.references[f"refs/tags/{tag_name}"]
 
     def get_latest_tag(self) -> pg2.Reference:
-        tag_name = self._repo.describe(describe_strategy=pg2.GIT_DESCRIBE_TAGS)
+        tag_name = self._repo.describe(
+            describe_strategy=pg2.GIT_DESCRIBE_TAGS, always_use_long_format=True
+        )
         return self.get_tag_ref(tag_name)
 
     def get_latest_annotated_tag(self) -> pg2.Reference:
-        tag_name = self._repo.describe()
+        tag_name = self._repo.describe(always_use_long_format=True)
         return self.get_tag_ref(tag_name)
 
     @staticmethod
