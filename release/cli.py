@@ -24,14 +24,18 @@ def main(ctx: click.Context, release_file: Path):
 
 
 @main.command()
-@click.pass_obj
-def start(obj: dict):
+@click.pass_context
+def start(ctx: click.Context):
     try:
-        config = load_release_config(obj["release_file"])
+        config = load_release_config(ctx.obj["release_file"])
     except ValidationError as e:
         raise click.UsageError(str(e))
     variables = parse_initial_variables(config, os.environ)
-    run_steps(config.steps, variables)
+    try:
+        run_steps(config.steps, variables)
+    except Exception as e:
+        click.secho(f"\n{e}", fg="red")
+        ctx.exit(1)
 
 
 @main.command()
