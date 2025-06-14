@@ -54,15 +54,34 @@ def validate(ctx: click.Context):
 
 
 @main.command()
+@click.option(
+    "--restart-on-change",
+    is_flag=True,
+    help="Restart the TUI when Python files in the release package change",
+)
 @click.pass_context
-def tui(ctx: click.Context):
+def tui(ctx: click.Context, restart_on_change: bool):
     release_file = ctx.obj["release_file"]
-    try:
-        app = ReleaseApp(config_path=release_file)
-        app.run()
-    except ValidationError as e:
-        click.secho(f"Configuration error: {e}", fg="red")
-        ctx.exit(1)
-    except Exception as e:
-        click.secho(f"Error: {e}", fg="red")
-        ctx.exit(1)
+
+    while True:
+        try:
+            app = ReleaseApp(
+                config_path=release_file, restart_on_change=restart_on_change
+            )
+            app.run()
+
+            # If restart_on_change is disabled or app didn't request restart, exit
+            if not restart_on_change or not getattr(app, "should_restart", False):
+                break
+
+            # Brief pause before restart to avoid rapid restarts
+            import time
+
+            time.sleep(0.1)
+
+        except ValidationError as e:
+            click.secho(f"Configuration error: {e}", fg="red")
+            ctx.exit(1)
+        except Exception as e:
+            click.secho(f"Error: {e}", fg="red")
+            ctx.exit(1)

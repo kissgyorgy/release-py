@@ -3,7 +3,7 @@
 }
 
 .current-step {
-  height: 3;
+  height: 1;
   background: blue;
   color: white;
   text-align: center;
@@ -26,7 +26,7 @@
 }
 
 .steps-header {
-  height: 3;
+  height: 1;
   text-align: center;
   content-align: center middle;
   background: darkblue;
@@ -39,7 +39,7 @@
 }
 
 .description-header {
-  height: 3;
+  height: 1;
   text-align: center;
   content-align: center middle;
   background: darkblue;

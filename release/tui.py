@@ -5,8 +5,20 @@ from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.message import Message
 from textual.widgets import Footer, Header, Label, ListItem, ListView, Static
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 
 from .config import load_release_config
+
+
+class PythonFileHandler(FileSystemEventHandler):
+    def __init__(self, restart_callback):
+        super().__init__()
+        self.restart_callback = restart_callback
+
+    def on_modified(self, event):
+        if not event.is_directory and event.src_path.endswith(".py"):
+            self.restart_callback()
 
 
 class StepsList(ListView):
@@ -22,11 +34,11 @@ class StepsList(ListView):
         if self.steps:
             self.index = 0
 
-    def on_list_view_selected(self, event: ListView.Selected) -> None:
-        """Handle step selection from the ListView"""
-        selected_index = event.list_view.index
-        if selected_index is not None:
-            self.post_message(self.StepSelected(selected_index))
+    def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
+        """Handle step highlighting from the ListView"""
+        highlighted_index = event.list_view.index
+        if highlighted_index is not None:
+            self.post_message(self.StepSelected(highlighted_index))
 
     class StepSelected(Message):
         """Message sent when a step is selected"""
@@ -83,11 +95,14 @@ class ReleaseApp(App):
         Binding("q", "quit", "Quit"),
     ]
 
-    def __init__(self, config_path=None, **kwargs):
+    def __init__(self, config_path=None, restart_on_change=False, **kwargs):
         super().__init__(**kwargs)
         self.config_path = config_path or Path("nogit/release.yaml")
         self.config = load_release_config(self.config_path)
         self.current_step_index = 0
+        self.restart_on_change = restart_on_change
+        self.observer = None
+        self.should_restart = False
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -137,6 +152,31 @@ class ReleaseApp(App):
         """Handle step selection from the steps list"""
         self.current_step_index = message.step_index
         self.update_current_step()
+
+    def restart_app(self):
+        """Callback to restart the app when files change"""
+        self.should_restart = True
+        self.exit()
+
+    def on_mount(self) -> None:
+        """Set up file watcher when app starts"""
+        if self.restart_on_change:
+            self.setup_file_watcher()
+
+    def setup_file_watcher(self):
+        """Set up the file watcher for Python files in the release package"""
+        release_package_path = Path(__file__).parent
+
+        self.observer = Observer()
+        event_handler = PythonFileHandler(self.restart_app)
+        self.observer.schedule(event_handler, str(release_package_path), recursive=True)
+        self.observer.start()
+
+    def on_unmount(self) -> None:
+        """Clean up file watcher when app exits"""
+        if self.observer:
+            self.observer.stop()
+            self.observer.join()
 
 
 if __name__ == "__main__":
