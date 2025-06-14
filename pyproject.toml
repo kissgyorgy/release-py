@@ -16,6 +16,9 @@ dependencies = [
     "textual>=1.0.0",
 ]
 
+[project.scripts]
+release = "release.cli:main"
+
 [tool.hatch.build.targets]
 wheel.packages = ["/release"]
 sdist.packages = ["/release"]
