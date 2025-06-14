@@ -1,2 +1,2 @@
-from .config import RunConfig
-from .run import run
+from .config import RunConfig as RunConfig
+from .run import run as run
