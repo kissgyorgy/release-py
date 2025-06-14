@@ -70,16 +70,24 @@ def tui(ctx: click.Context, restart_on_change: bool):
     if not release_file.exists():
         raise click.UsageError(f"Release file '{release_file}' does not exist")
 
+    # Initialize state that persists across restarts
+    persistent_state = {"current_step_index": 0, "variables": None}
+
     while True:
         try:
             app = ReleaseApp(
-                config_path=release_file, restart_on_change=restart_on_change
+                config_path=release_file,
+                restart_on_change=restart_on_change,
+                initial_state=persistent_state,
             )
             app.run()
 
             # If restart_on_change is disabled or app didn't request restart, exit
             if not restart_on_change or not getattr(app, "should_restart", False):
                 break
+
+            # Preserve state for next restart
+            persistent_state = app.get_state()
 
             # Brief pause before restart to avoid rapid restarts
             import time

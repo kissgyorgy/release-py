@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from textual.app import App, ComposeResult
@@ -8,7 +9,7 @@ from textual.widgets import Footer, Header, Label, ListItem, ListView, Static
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
-from .config import load_release_config
+from .config import load_release_config, parse_initial_variables
 
 
 class PythonFileHandler(FileSystemEventHandler):
@@ -32,7 +33,12 @@ class StepsList(ListView):
             list_item = ListItem(Label(f"{i + 1}. {step.title}"))
             self.append(list_item)
         if self.steps:
-            self.index = 0
+            # Use current_step from parent app if available
+            app = self.app
+            if hasattr(app, "current_step_index"):
+                self.index = app.current_step_index
+            else:
+                self.index = 0
 
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
         """Handle step highlighting from the ListView"""
@@ -95,11 +101,25 @@ class ReleaseApp(App):
         Binding("q", "quit", "Quit"),
     ]
 
-    def __init__(self, config_path=None, restart_on_change=False, **kwargs):
+    def __init__(
+        self, config_path=None, restart_on_change=False, initial_state=None, **kwargs
+    ):
         super().__init__(**kwargs)
         self.config_path = config_path or Path("nogit/release.yaml")
         self.config = load_release_config(self.config_path)
-        self.current_step_index = 0
+
+        # Initialize state from previous run or defaults
+        if initial_state:
+            self.current_step_index = initial_state.get("current_step_index", 0)
+            self.variables = initial_state.get("variables")
+        else:
+            self.current_step_index = 0
+            self.variables = None
+
+        # Initialize variables if not already set
+        if self.variables is None:
+            self.variables = parse_initial_variables(self.config, os.environ)
+
         self.restart_on_change = restart_on_change
         self.observer = None
         self.should_restart = False
@@ -157,6 +177,13 @@ class ReleaseApp(App):
         """Callback to restart the app when files change"""
         self.should_restart = True
         self.exit()
+
+    def get_state(self):
+        """Return current app state for persistence across restarts"""
+        return {
+            "current_step_index": self.current_step_index,
+            "variables": self.variables,
+        }
 
     def on_mount(self) -> None:
         """Set up file watcher when app starts"""
