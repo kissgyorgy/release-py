@@ -38,7 +38,17 @@
   margin: 1;
 }
 
-.panel-content {
+.description-header {
+  height: 3;
   text-align: center;
   content-align: center middle;
+  background: darkblue;
+  color: white;
+}
+
+.description-content {
+  height: 1fr;
+  padding: 1;
+  text-align: left;
+  overflow-y: auto;
 }

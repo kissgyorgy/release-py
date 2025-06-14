@@ -6,6 +6,7 @@ from pydantic import ValidationError
 
 from .config import load_release_config, parse_initial_variables
 from .steps import run_steps
+from .tui import ReleaseApp
 
 
 @click.group()
@@ -50,3 +51,18 @@ def validate(ctx: click.Context):
         ctx.exit(1)
     else:
         click.echo("Configuration file seems valid!")
+
+
+@main.command()
+@click.pass_context
+def tui(ctx: click.Context):
+    release_file = ctx.obj["release_file"]
+    try:
+        app = ReleaseApp(config_path=release_file)
+        app.run()
+    except ValidationError as e:
+        click.secho(f"Configuration error: {e}", fg="red")
+        ctx.exit(1)
+    except Exception as e:
+        click.secho(f"Error: {e}", fg="red")
+        ctx.exit(1)
