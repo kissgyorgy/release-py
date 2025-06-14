@@ -9,11 +9,11 @@ from .steps import run_steps
 from .tui import ReleaseApp
 
 
-@click.group()
+@click.group(context_settings={"help_option_names": ["-h", "--help"]})
 @click.option(
     "-f",
     "release_file",
-    type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path),
+    type=click.Path(file_okay=True, dir_okay=False, path_type=Path),
     default="release.yaml",
 )
 @click.pass_context
@@ -24,11 +24,14 @@ def main(ctx: click.Context, release_file: Path):
     ctx.obj["release_file"] = release_file
 
 
-@main.command()
+@main.command(context_settings={"help_option_names": ["-h", "--help"]})
 @click.pass_context
 def start(ctx: click.Context):
+    release_file = ctx.obj["release_file"]
+    if not release_file.exists():
+        raise click.UsageError(f"Release file '{release_file}' does not exist")
     try:
-        config = load_release_config(ctx.obj["release_file"])
+        config = load_release_config(release_file)
     except ValidationError as e:
         raise click.UsageError(str(e))
     variables = parse_initial_variables(config, os.environ)
@@ -39,10 +42,12 @@ def start(ctx: click.Context):
         ctx.exit(1)
 
 
-@main.command()
+@main.command(context_settings={"help_option_names": ["-h", "--help"]})
 @click.pass_context
 def validate(ctx: click.Context):
     release_file = ctx.obj["release_file"]
+    if not release_file.exists():
+        raise click.UsageError(f"Release file '{release_file}' does not exist")
     click.echo(f"Validating {release_file.resolve()}")
     try:
         load_release_config(release_file)
@@ -53,7 +58,7 @@ def validate(ctx: click.Context):
         click.echo("Configuration file seems valid!")
 
 
-@main.command()
+@main.command(context_settings={"help_option_names": ["-h", "--help"]})
 @click.option(
     "--restart-on-change",
     is_flag=True,
@@ -62,6 +67,8 @@ def validate(ctx: click.Context):
 @click.pass_context
 def tui(ctx: click.Context, restart_on_change: bool):
     release_file = ctx.obj["release_file"]
+    if not release_file.exists():
+        raise click.UsageError(f"Release file '{release_file}' does not exist")
 
     while True:
         try:
