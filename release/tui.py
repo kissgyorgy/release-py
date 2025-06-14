@@ -12,13 +12,15 @@ from watchdog.observers import Observer
 from .config import load_release_config, parse_initial_variables
 
 
-class PythonFileHandler(FileSystemEventHandler):
+class TUIFileHandler(FileSystemEventHandler):
     def __init__(self, restart_callback):
         super().__init__()
         self.restart_callback = restart_callback
 
     def on_modified(self, event):
-        if not event.is_directory and event.src_path.endswith(".py"):
+        if not event.is_directory and (
+            event.src_path.endswith(".py") or event.src_path.endswith(".tcss")
+        ):
             self.restart_callback()
 
 
@@ -191,11 +193,11 @@ class ReleaseApp(App):
             self.setup_file_watcher()
 
     def setup_file_watcher(self):
-        """Set up the file watcher for Python files in the release package"""
+        """Set up the file watcher for Python and CSS files in the release package"""
         release_package_path = Path(__file__).parent
 
         self.observer = Observer()
-        event_handler = PythonFileHandler(self.restart_app)
+        event_handler = TUIFileHandler(self.restart_app)
         self.observer.schedule(event_handler, str(release_package_path), recursive=True)
         self.observer.start()
 
