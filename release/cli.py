@@ -6,7 +6,6 @@ from pydantic import ValidationError
 
 from .config import load_release_config, parse_initial_variables
 from .steps import run_steps
-from .tui import ReleaseApp
 
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
@@ -66,6 +65,10 @@ def validate(ctx: click.Context):
 )
 @click.pass_context
 def tui(ctx: click.Context, restart_on_change: bool):
+    import importlib
+
+    from . import tui
+
     release_file = ctx.obj["release_file"]
     if not release_file.exists():
         raise click.UsageError(f"Release file '{release_file}' does not exist")
@@ -75,7 +78,7 @@ def tui(ctx: click.Context, restart_on_change: bool):
 
     while True:
         try:
-            app = ReleaseApp(
+            app = tui.ReleaseApp(
                 config_path=release_file,
                 restart_on_change=restart_on_change,
                 initial_state=persistent_state,
@@ -88,6 +91,7 @@ def tui(ctx: click.Context, restart_on_change: bool):
 
             # Preserve state for next restart
             persistent_state = app.get_state()
+            importlib.reload(tui)
 
             # Brief pause before restart to avoid rapid restarts
             import time
