@@ -4,7 +4,6 @@
 
 .current-step {
   height: 1;
-  background: blue;
   color: white;
   text-align: center;
   content-align: center middle;
