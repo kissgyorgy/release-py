@@ -35,7 +35,12 @@ class StepsList(ListView):
             list_item = ListItem(Label(f"{i + 1}. {step.title}"))
             self.append(list_item)
         if self.steps:
-            # Set the index to the current step
+            # Schedule the index setting after the next refresh to ensure ListView is fully initialized
+            self.call_after_refresh(self._set_initial_selection)
+
+    def _set_initial_selection(self) -> None:
+        """Set the initial selection after the ListView is fully initialized"""
+        if 0 <= self.current_step_index < len(self.steps):
             self.index = self.current_step_index
 
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
@@ -148,15 +153,20 @@ class ReleaseApp(App):
         if self.current_step_index > 0:
             self.current_step_index -= 1
             self.update_current_step()
-            steps_list = self.query_one(StepsList)
-            steps_list.index = self.current_step_index
+            # Update ListView selection after a refresh to ensure proper synchronization
+            self.call_after_refresh(self._sync_listview_selection)
 
     def action_move_down(self) -> None:
         if self.current_step_index < len(self.config.steps) - 1:
             self.current_step_index += 1
             self.update_current_step()
-            steps_list = self.query_one(StepsList)
-            steps_list.index = self.current_step_index
+            # Update ListView selection after a refresh to ensure proper synchronization
+            self.call_after_refresh(self._sync_listview_selection)
+
+    def _sync_listview_selection(self) -> None:
+        """Synchronize the ListView selection with current_step_index"""
+        steps_list = self.query_one(StepsList)
+        steps_list.index = self.current_step_index
 
     def update_current_step(self) -> None:
         current_step_widget = self.query_one("#current-step", Static)
