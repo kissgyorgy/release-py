@@ -25,22 +25,18 @@ class TUIFileHandler(FileSystemEventHandler):
 
 
 class StepsList(ListView):
-    def __init__(self, steps, **kwargs):
+    def __init__(self, steps, current_step_index=0, **kwargs):
         super().__init__(**kwargs)
         self.steps = steps
-        self.current_step = 0
+        self.current_step_index = current_step_index
 
     def on_mount(self) -> None:
         for i, step in enumerate(self.steps):
             list_item = ListItem(Label(f"{i + 1}. {step.title}"))
             self.append(list_item)
         if self.steps:
-            # Use current_step from parent app if available
-            app = self.app
-            if hasattr(app, "current_step_index"):
-                self.index = app.current_step_index
-            else:
-                self.index = 0
+            # Set the index to the current step
+            self.index = self.current_step_index
 
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
         """Handle step highlighting from the ListView"""
@@ -57,14 +53,15 @@ class StepsList(ListView):
 
 
 class LeftPanel(Static):
-    def __init__(self, steps, **kwargs):
+    def __init__(self, steps, current_step_index=0, **kwargs):
         super().__init__(**kwargs)
         self.steps = steps
+        self.current_step_index = current_step_index
 
     def compose(self) -> ComposeResult:
         with Vertical():
             yield Static("Steps", classes="steps-header")
-            yield StepsList(self.steps, classes="steps-list")
+            yield StepsList(self.steps, self.current_step_index, classes="steps-list")
 
 
 class RightPanel(Static):
@@ -136,7 +133,9 @@ class ReleaseApp(App):
             )
 
             with Horizontal(classes="main-content"):
-                yield LeftPanel(self.config.steps, classes="left-panel")
+                yield LeftPanel(
+                    self.config.steps, self.current_step_index, classes="left-panel"
+                )
                 yield RightPanel(
                     self.config.steps[self.current_step_index],
                     classes="right-panel",
