@@ -3,10 +3,11 @@ from pathlib import Path
 from typing import List, Mapping, Optional
 
 import yaml
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, root_validator, validator
 
 from .git import GitConfig
 from .parser import render_with_envvars
+from .runner import RunConfig
 from .types import Variables
 
 
@@ -21,10 +22,12 @@ class Version(BaseModel):
 
 
 class Step(BaseModel):
+    # TODO: make title and desc optional
     title: str
     description: Optional[str]
     git: Optional[GitConfig]
     set_variable: Optional[str]
+    run: Optional[RunConfig]
 
     @property
     def has_action(self):
@@ -40,6 +43,15 @@ class Step(BaseModel):
         if not v.endswith("\n"):
             return v + "\n"
         return v
+
+    @root_validator(pre=True)
+    def validate_only_one_action(cls, values):
+        if "git" in values and "run" in values:
+            raise ValueError(
+                "Only 1 action can be specified for a Step at once.\n"
+                '  Specified actions: "git" and "run".'
+            )
+        return values
 
 
 class ReleaseConfig(BaseModel):
