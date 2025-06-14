@@ -3,7 +3,7 @@
 }
 
 .current-step {
-  height: 1;
+  height: 2;
   color: white;
   text-align: center;
   content-align: center middle;
@@ -11,13 +11,13 @@
 }
 
 .left-panel {
-  width: 30%;
+  width: 25%;
   height: 100%;
   border-right: solid white;
 }
 
 .right-panel {
-  width: 70%;
+  width: 75%;
   height: 100%;
 }
 

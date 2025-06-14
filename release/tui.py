@@ -65,8 +65,16 @@ class LeftPanel(Static):
 
     def compose(self) -> ComposeResult:
         with Vertical():
-            yield Static("Steps", classes="steps-header")
+            progress_text = f"Steps ({self.current_step_index + 1}/{len(self.steps)})"
+            yield Static(progress_text, classes="steps-header", id="steps-header")
             yield StepsList(self.steps, self.current_step_index, classes="steps-list")
+
+    def update_progress(self, current_step_index):
+        """Update the progress display"""
+        self.current_step_index = current_step_index
+        header_widget = self.query_one("#steps-header", Static)
+        progress_text = f"Steps ({current_step_index + 1}/{len(self.steps)})"
+        header_widget.update(progress_text)
 
 
 class RightPanel(Static):
@@ -76,7 +84,14 @@ class RightPanel(Static):
 
     def compose(self) -> ComposeResult:
         with Vertical():
-            yield Static("Description", classes="description-header")
+            header_text = (
+                self.current_step.title
+                if self.current_step and self.current_step.title
+                else "No step selected"
+            )
+            yield Static(
+                header_text, classes="description-header", id="description-header"
+            )
             description_text = (
                 self.current_step.description
                 if self.current_step and self.current_step.description
@@ -89,7 +104,13 @@ class RightPanel(Static):
             )
 
     def update_description(self, step):
-        """Update the description content with a new step"""
+        """Update the description content and header with a new step"""
+        # Update header with step title
+        header_widget = self.query_one("#description-header", Static)
+        header_text = step.title if step.title else "No step selected"
+        header_widget.update(header_text)
+
+        # Update description content
         description_widget = self.query_one("#description-content", Static)
         description_text = (
             step.description if step.description else "No description available"
@@ -130,22 +151,15 @@ class ReleaseApp(App):
     def compose(self) -> ComposeResult:
         yield Header()
 
-        with Vertical():
-            yield Static(
-                f"Current Step: {self.current_step_index + 1}/{len(self.config.steps)} - {self.config.steps[self.current_step_index].title}",
-                classes="current-step",
-                id="current-step",
+        with Horizontal(classes="main-content"):
+            yield LeftPanel(
+                self.config.steps, self.current_step_index, classes="left-panel"
             )
-
-            with Horizontal(classes="main-content"):
-                yield LeftPanel(
-                    self.config.steps, self.current_step_index, classes="left-panel"
-                )
-                yield RightPanel(
-                    self.config.steps[self.current_step_index],
-                    classes="right-panel",
-                    id="right-panel",
-                )
+            yield RightPanel(
+                self.config.steps[self.current_step_index],
+                classes="right-panel",
+                id="right-panel",
+            )
 
         yield Footer()
 
@@ -169,10 +183,9 @@ class ReleaseApp(App):
         steps_list.index = self.current_step_index
 
     def update_current_step(self) -> None:
-        current_step_widget = self.query_one("#current-step", Static)
-        current_step_widget.update(
-            f"Current Step: {self.current_step_index + 1}/{len(self.config.steps)} - {self.config.steps[self.current_step_index].title}"
-        )
+        # Update the left panel progress
+        left_panel = self.query_one(".left-panel", LeftPanel)
+        left_panel.update_progress(self.current_step_index)
 
         # Update the right panel description
         right_panel = self.query_one("#right-panel", RightPanel)
