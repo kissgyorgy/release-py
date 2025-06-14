@@ -100,7 +100,6 @@ class ReleaseApp(App):
     BINDINGS = [
         Binding("up", "move_up", "Move Up"),
         Binding("down", "move_down", "Move Down"),
-        Binding("q", "quit", "Quit"),
     ]
 
     def __init__(
