@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(release --help)",
+      "Bash(release:*)"
+    ],
+    "deny": [
+        "Bash(release tui:*)"
+    ]
+  }
+}
