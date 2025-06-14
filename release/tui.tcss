@@ -8,21 +8,18 @@
   color: white;
   text-align: center;
   content-align: center middle;
-  margin: 1 0;
+  border-bottom: solid white;
 }
 
 .left-panel {
   width: 30%;
   height: 100%;
-  border: solid white;
-  margin: 1;
+  border-right: solid white;
 }
 
 .right-panel {
   width: 70%;
   height: 100%;
-  border: solid white;
-  margin: 1;
 }
 
 .steps-header {
@@ -35,7 +32,6 @@
 
 .steps-list {
   height: 1fr;
-  margin: 1;
 }
 
 .description-header {
@@ -48,7 +44,6 @@
 
 .description-content {
   height: 1fr;
-  padding: 1;
   text-align: left;
   overflow-y: auto;
 }
