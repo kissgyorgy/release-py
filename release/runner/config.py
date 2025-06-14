@@ -10,8 +10,8 @@ class RunConfig(BaseModel):
     chdir: Path = Path.cwd()
     env: Variables = {}
 
-    command: Optional[str]
-    script: Optional[str]
+    command: Optional[str] = None
+    script: Optional[str] = None
 
     @root_validator(pre=True)
     def validate_at_least_one_command(cls, values):

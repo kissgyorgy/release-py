@@ -1,0 +1,44 @@
+.main-content {
+  height: 1fr;
+}
+
+.current-step {
+  height: 3;
+  background: blue;
+  color: white;
+  text-align: center;
+  content-align: center middle;
+  margin: 1 0;
+}
+
+.left-panel {
+  width: 30%;
+  height: 100%;
+  border: solid white;
+  margin: 1;
+}
+
+.right-panel {
+  width: 70%;
+  height: 100%;
+  border: solid white;
+  margin: 1;
+}
+
+.steps-header {
+  height: 3;
+  text-align: center;
+  content-align: center middle;
+  background: darkblue;
+  color: white;
+}
+
+.steps-list {
+  height: 1fr;
+  margin: 1;
+}
+
+.panel-content {
+  text-align: center;
+  content-align: center middle;
+}

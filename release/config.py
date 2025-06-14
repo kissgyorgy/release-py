@@ -14,20 +14,24 @@ from .types import Variables
 class Version(BaseModel):
     from_time: Optional[str]
 
-    @validator("*")
-    def check_version(cls, values):
-        if not values:
+    @validator("from_time")
+    def check_version(cls, v):
+        if not v:
             raise ValueError("Version must be specified")
-        return values
+        return v
 
 
 class Step(BaseModel):
     # TODO: make title and desc optional
     title: str
-    description: Optional[str]
-    git: Optional[GitConfig]
-    set_variable: Optional[str]
-    run: Optional[RunConfig]
+    description: Optional[str] = None
+    git: Optional[GitConfig] = None
+    set_variable: Optional[str] = None
+    run: Optional[RunConfig] = None
+    gitlab: Optional[dict] = None
+    environments: Optional[list] = None
+    checklist: Optional[list] = None
+    open_url: Optional[str] = None
 
     @property
     def has_action(self):
@@ -40,7 +44,7 @@ class Step(BaseModel):
 
     @validator("description")
     def add_newline(cls, v: str) -> str:
-        if not v.endswith("\n"):
+        if v and not v.endswith("\n"):
             return v + "\n"
         return v
 
