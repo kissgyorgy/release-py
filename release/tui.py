@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+from markdown_it import MarkdownIt
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
@@ -10,6 +11,11 @@ from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 from .config import load_release_config, parse_initial_variables
+
+
+def create_markdown_parser():
+    """Create a MarkdownIt parser configured to render newlines as line breaks"""
+    return MarkdownIt("commonmark", {"breaks": True})
 
 
 class TUIFileHandler(FileSystemEventHandler):
@@ -99,6 +105,7 @@ class RightPanel(Static):
             )
             yield Markdown(
                 description_text,
+                parser_factory=create_markdown_parser,
                 classes="description-content",
                 id="description-content",
             )
