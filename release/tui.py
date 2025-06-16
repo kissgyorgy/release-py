@@ -5,7 +5,7 @@ from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.message import Message
-from textual.widgets import Footer, Header, Label, ListItem, ListView, Static
+from textual.widgets import Footer, Header, Label, ListItem, ListView, Markdown, Static
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
@@ -97,7 +97,7 @@ class RightPanel(Static):
                 if self.current_step and self.current_step.description
                 else "No description available"
             )
-            yield Static(
+            yield Markdown(
                 description_text,
                 classes="description-content",
                 id="description-content",
@@ -111,7 +111,7 @@ class RightPanel(Static):
         header_widget.update(header_text)
 
         # Update description content
-        description_widget = self.query_one("#description-content", Static)
+        description_widget = self.query_one("#description-content", Markdown)
         description_text = (
             step.description if step.description else "No description available"
         )
