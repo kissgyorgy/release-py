@@ -13,7 +13,7 @@ dependencies = [
     "pydantic>=2.11.7",
     "pygit2>=1.17.0",
     "pyyaml>=6.0.2",
-    "textual>=1.0.0",
+    "textual>=0.89.1",
     "watchdog>=3.0.0",
 ]
 
